@@ -2,6 +2,7 @@ package com.pemmob.gameexplore.ui.screen
 
 import android.text.Html
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -22,7 +23,7 @@ import com.pemmob.gameexplore.ui.viewmodel.GameViewModel
 import com.pemmob.gameexplore.util.formatRating
 import com.pemmob.gameexplore.util.ratingStars
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun GameDetailScreen(
     gameId: Int,
@@ -153,12 +154,27 @@ fun GameDetailScreen(
                             }
 
                             if (!game.genres.isNullOrEmpty()) {
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = "Genre: ${game.genres.joinToString(", ") { it.name ?: "" }}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.secondary
+                                    text = "Genre",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                // Pill per genre (FlowRow), sejalan dengan kartu rating & tanggal di atas.
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    game.genres.forEach { genre ->
+                                        SuggestionChip(
+                                            onClick = {},
+                                            label = { Text(genre.name ?: "") },
+                                            shape = RoundedCornerShape(10.dp)
+                                        )
+                                    }
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(20.dp))

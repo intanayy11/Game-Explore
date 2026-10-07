@@ -1,19 +1,26 @@
 package com.pemmob.gameexplore.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pemmob.gameexplore.data.model.Game
@@ -31,12 +38,20 @@ fun HomeScreen(
     val searchQuery = viewModel.searchQuery
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Game Catalog & Explore", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "Game Explore",
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         }
@@ -45,16 +60,11 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { viewModel.updateSearchQuery(it) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Cari video game...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Cari") },
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true
+            SearchField(
+                query = searchQuery,
+                onQueryChange = { viewModel.updateSearchQuery(it) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -62,36 +72,95 @@ fun HomeScreen(
             when (uiState) {
                 is HomeUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
+
                 is HomeUiState.Success -> {
                     val games = uiState.games
                     if (games.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Game tidak ditemukan", style = MaterialTheme.typography.bodyLarge)
-                        }
+                        EmptyState(message = "Game tidak ditemukan")
                     } else {
-                        LazyColumn(
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            items(games) { game ->
+                            items(games, key = { it.id }) { game ->
                                 GameItemCard(game = game, onClick = { onGameClick(game.id) })
                             }
                         }
                     }
                 }
+
                 is HomeUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = uiState.message, color = MaterialTheme.colorScheme.error)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(onClick = { viewModel.fetchGames(searchQuery) }) {
-                                Text("Coba Lagi")
-                            }
-                        }
-                    }
+                    EmptyState(
+                        message = uiState.message,
+                        icon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                        actionLabel = "Coba Lagi",
+                        onAction = { viewModel.fetchGames(viewModel.searchQuery) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchField(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier.fillMaxWidth(),
+        placeholder = { Text("Cari video game...") },
+        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Cari") },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(Icons.Filled.Close, contentDescription = "Bersihkan")
+                }
+            }
+        },
+        shape = RoundedCornerShape(16.dp),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            focusedBorderColor = MaterialTheme.colorScheme.primary
+        )
+    )
+}
+
+@Composable
+private fun EmptyState(
+    message: String,
+    icon: @Composable () -> Unit = {
+        Icon(
+            Icons.Filled.SearchOff,
+            contentDescription = null,
+            modifier = Modifier.size(56.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+    },
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null
+) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            icon()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (actionLabel != null && onAction != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(onClick = onAction) {
+                    Text(actionLabel)
                 }
             }
         }
@@ -104,44 +173,49 @@ fun GameItemCard(game: Game, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = game.backgroundImage,
-                contentDescription = game.name,
+        Column {
+            Box(
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
+                    .fillMaxWidth()
+                    .height(96.dp)
             ) {
+                AsyncImage(
+                    model = game.backgroundImage,
+                    contentDescription = game.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.45f))
+                            )
+                        )
+                )
+            }
+
+            Column(modifier = Modifier.padding(10.dp)) {
                 Text(
                     text = game.name ?: "Unknown Game",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Rating: ${formatRating(game.rating)}",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "${formatRating(game.rating)} / 5",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    // Spek meminta tanggal rilis tetap ISO 8601 (YYYY-MM-DD)
-                    text = "Rilis: ${game.released ?: "TBA"}",
+                    text = game.released ?: "TBA",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

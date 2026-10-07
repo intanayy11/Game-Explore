@@ -7,15 +7,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pemmob.gameexplore.ui.viewmodel.DetailUiState
@@ -37,6 +36,7 @@ fun GameDetailScreen(
     val uiState = viewModel.detailUiState
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Detail Game", fontWeight = FontWeight.Bold) },
@@ -46,8 +46,8 @@ fun GameDetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         }
@@ -60,9 +60,10 @@ fun GameDetailScreen(
             when (uiState) {
                 is DetailUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
+
                 is DetailUiState.Success -> {
                     val game = uiState.game
                     val scrollState = rememberScrollState()
@@ -71,84 +72,116 @@ fun GameDetailScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
-                            .padding(16.dp)
                     ) {
                         AsyncImage(
                             model = game.backgroundImage,
                             contentDescription = game.name,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(220.dp)
-                                .clip(RoundedCornerShape(16.dp)),
+                                .height(240.dp),
                             contentScale = ContentScale.Crop
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = game.name ?: "Unknown Game",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold
+                            )
 
-                        Text(
-                            text = game.name ?: "Unknown Game",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(12.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.StarRate,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = "${formatRating(game.rating)} / 5",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                        Text(
+                                            text = ratingStars(game.rating),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                }
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(12.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.CalendarMonth,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = game.released ?: "TBA",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = "Tanggal Rilis",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (!game.genres.isNullOrEmpty()) {
+                                Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "⭐ Rating: ${formatRating(game.rating)} / 5",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    text = ratingStars(game.rating),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.primary
+                                    text = "Genre: ${game.genres.joinToString(", ") { it.name ?: "" }}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.secondary
                                 )
                             }
-                            Text(
-                                // ISO 8601 sesuai spek (YYYY-MM-DD)
-                                text = "📅 Rilis: ${game.released ?: "TBA"}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
 
-                        if (!game.genres.isNullOrEmpty()) {
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Text(
+                                text = "Deskripsi",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
                             Spacer(modifier = Modifier.height(8.dp))
+
+                            val rawDesc = game.descriptionRaw ?: game.description ?: "Tidak ada deskripsi tersedia."
+                            val cleanDesc = Html.fromHtml(rawDesc, Html.FROM_HTML_MODE_LEGACY).toString()
+
                             Text(
-                                text = "Genre: ${game.genres.joinToString(", ") { it.name ?: "" }}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.secondary
+                                text = cleanDesc,
+                                style = MaterialTheme.typography.bodyMedium
                             )
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        HorizontalDivider()
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = "Deskripsi",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        val rawDesc = game.descriptionRaw ?: game.description ?: "Tidak ada deskripsi tersedia."
-                        val cleanDesc = Html.fromHtml(rawDesc, Html.FROM_HTML_MODE_LEGACY).toString()
-
-                        Text(
-                            text = cleanDesc,
-                            style = MaterialTheme.typography.bodyMedium,
-                            lineHeight = TextUnit(22f, TextUnitType.Sp)
-                        )
                     }
                 }
+
                 is DetailUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pemmob.gameexplore.ui.viewmodel.DetailUiState
 import com.pemmob.gameexplore.ui.viewmodel.GameViewModel
+import com.pemmob.gameexplore.util.formatRating
+import com.pemmob.gameexplore.util.ratingStars
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,15 +95,24 @@ fun GameDetailScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Column {
+                                Text(
+                                    text = "⭐ Rating: ${formatRating(game.rating)} / 5",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = ratingStars(game.rating),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             Text(
-                                text = "⭐ Rating: ${game.rating ?: "N/A"}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
+                                // ISO 8601 sesuai spek (YYYY-MM-DD)
                                 text = "📅 Rilis: ${game.released ?: "TBA"}",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant

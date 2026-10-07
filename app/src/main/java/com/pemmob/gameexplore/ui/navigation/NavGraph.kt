@@ -28,6 +28,9 @@ fun NavGraph() {
             HomeScreen(
                 viewModel = viewModel,
                 onGameClick = { gameId ->
+                    // Reset dulu supaya layar detail tidak sempat menampilkan
+                    // data game sebelumnya pada frame pertama.
+                    viewModel.resetDetailState()
                     navController.navigate(Screen.Detail.createRoute(gameId))
                 }
             )

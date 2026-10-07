@@ -19,6 +19,7 @@ import coil3.compose.AsyncImage
 import com.pemmob.gameexplore.data.model.Game
 import com.pemmob.gameexplore.ui.viewmodel.HomeUiState
 import com.pemmob.gameexplore.ui.viewmodel.GameViewModel
+import com.pemmob.gameexplore.util.formatRating
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,12 +134,13 @@ fun GameItemCard(game: Game, onClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Rating: ${game.rating ?: "N/A"}",
+                    text = "Rating: ${formatRating(game.rating)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
+                    // Spek meminta tanggal rilis tetap ISO 8601 (YYYY-MM-DD)
                     text = "Rilis: ${game.released ?: "TBA"}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

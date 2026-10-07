@@ -40,6 +40,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation("io.coil-kt.coil3:coil-compose:3.1.0")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

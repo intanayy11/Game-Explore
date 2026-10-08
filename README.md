@@ -22,7 +22,9 @@ Repository: https://github.com/intanayy11/Game-Explore
       <b>Game Detail Screen</b><br>
       <img src="screenshots/detail.png" width="100%">
     </td>
-    <td align="center" width="33%">
+  </tr>
+  <tr>
+  <td align="center" width="33%">
       <b>Empty State</b><br>
       <img src="screenshots/empty-state.png" width="100%">
     </td>

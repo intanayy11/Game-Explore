@@ -81,19 +81,6 @@ RAWG API ──► Retrofit (data/remote) ──► DTO (data/model)
 6. **`ui/screen/*`** — composable murni (`HomeScreen` & `GameDetailScreen`) yang merender UI berdasarkan state.
 7. **`ui/navigation/NavGraph.kt`** — `NavHost` dengan rute `home` dan `detail/{gameId}`.
 
----
-
-## Cara Menambahkan Screenshots untuk README
-
-1. Buat folder bernama `screenshots` di root directory project Anda (`D:/Praktikum-Pemmob/GameExplore/screenshots/`).
-2. Masukkan file gambar hasil tangkapan layar aplikasi dengan nama:
-   - `home.png` (Tampilan Home Screen)
-   - `search.png` (Tampilan saat melakukan pencarian)
-   - `detail.png` (Tampilan Detail Game)
-3. Commit dan push ke repository GitHub Anda.
-
----
-
 ## Cara Menjalankan
 
 1. Clone repository ini lalu buka di **Android Studio**.

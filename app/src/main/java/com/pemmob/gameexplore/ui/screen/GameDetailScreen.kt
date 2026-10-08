@@ -21,7 +21,6 @@ import coil3.compose.AsyncImage
 import com.pemmob.gameexplore.ui.viewmodel.DetailUiState
 import com.pemmob.gameexplore.ui.viewmodel.GameViewModel
 import com.pemmob.gameexplore.util.formatRating
-import com.pemmob.gameexplore.util.ratingStars
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -117,7 +116,7 @@ fun GameDetailScreen(
                                             color = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
                                         Text(
-                                            text = ratingStars(game.rating),
+                                            text = "Rating",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onPrimaryContainer
                                         )

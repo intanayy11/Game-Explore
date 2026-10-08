@@ -188,4 +188,4 @@ Data game disediakan oleh [RAWG](https://rawg.io).
 
 Urutan penjelasan kode selengkapnya — dari `Constants.kt` sampai theme, termasuk
 pemetaan ke setiap butir persyaratan responsi — ada di
-[`docs/penjelasan-kode.md`](docs/penjelasan-kode.md).
+[`docs/Penjelasan-Kode-GameExplore.pdf`](docs/Penjelasan-Kode-GameExplore.pdf).

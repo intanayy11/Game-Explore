@@ -26,7 +26,6 @@ import coil3.compose.AsyncImage
 import com.pemmob.gameexplore.data.model.Game
 import com.pemmob.gameexplore.ui.viewmodel.HomeUiState
 import com.pemmob.gameexplore.ui.viewmodel.GameViewModel
-import com.pemmob.gameexplore.util.formatRating
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -180,7 +179,7 @@ fun GameItemCard(game: Game, onClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(96.dp)
+                    .height(110.dp)
             ) {
                 AsyncImage(
                     model = game.backgroundImage,
@@ -193,7 +192,7 @@ fun GameItemCard(game: Game, onClick: () -> Unit) {
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.45f))
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f))
                             )
                         )
                 )
@@ -209,7 +208,7 @@ fun GameItemCard(game: Game, onClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${formatRating(game.rating)} / 5",
+                    text = "⭐ ${game.rating ?: 0.0} / 5",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )

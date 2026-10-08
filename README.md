@@ -10,27 +10,52 @@ Repository: https://github.com/intanayy11/Game-Explore
 
 ## Screenshots
 
-<!-- TODO: isi folder screenshots/ dengan hasil capture emulator, lalu hapus komentar ini -->
-<!-- Minimal 4 gambar: home, search, detail, empty-state -->
-
-| Home | Search | Detail |
-| :---: | :---: | :---: |
-| ![Home](screenshots/home.png) | ![Search](screenshots/search.png) | ![Detail](screenshots/detail.png) |
-
-- ![Empty state](screenshots/empty-state.png) — search tidak menemukan data
-- ![Error state](screenshots/error-state.png) — tanpa koneksi internet (tombol "Coba Lagi")
-
+<table border="1">
+  <tr>
+    <td align="center" width="30%">
+      <b>Preview Home</b><br>
+      <b>Home </b><br>
+      <img src="screenshots/home.png" width="100%">
+    </td>
+    <td align="center" width="30%">
+      <b>Preview Seacrh</b><br>
+      <b>Search</b><br>
+      <img src="screenshots/search.png" width="100%">
+    </td>
+  </tr>
+   <tr>
+    <td align="center" width="30%">
+      <b>Preview Detail Game</b><br>
+      <b>Detail Game</b><br>
+      <img src="screenshots/detail.png" width="100%">
+    </td>
+    <td align="center" width="30%">
+      <b>Error state</b><br>
+      <b>Tanpa Koneksi Internet</b><br>
+      <img src="screenshots/error-state.png" width="100%">
+    </td>
+    <td align="center" width="30%">
+      <b>Empty State</b><br>
+      <b>Search tidak menemukan data</b><br>
+      <img src="screenshots/empty-state.png" width="100%">
+    </td>
+    <td align="center" width="30%">
+      <b>Preview Seacrh</b><br>
+      <b>Search</b><br>
+      <img src="screenshots/search.png" width="100%">
+    </td>
+  </tr>
 ---
 
 ## Fitur
 
 **Home Screen**
-- Daftar game dari RAWG API memakai `LazyVerticalGrid` (2 kolom), tiap kartu menampilkan gambar, judul, rating, dan tanggal rilis (ISO 8601, `YYYY-MM-DD` sesuai spek).
+- Daftar game dari RAWG API memakai `LazyColumn`, tiap kartu menampilkan gambar, judul, rating, dan tanggal rilis (ISO 8601, `YYYY-MM-DD` sesuai spek).
 - Search bar: mengetik langsung mengubah state, request ke API ditunda 300 ms (debounce).
 - Tiga kondisi UI: loading (spinner), kosong ("Game tidak ditemukan"), error (pesan + tombol Coba Lagi).
 
 **Game Detail Screen**
-- Mengambil detail game berdasarkan `id` yang dipilih: banner, judul, rating + bintang, tanggal rilis, chip genre, dan deskripsi lengkap (HTML dibersihkan).
+- Mengambil detail game berdasarkan `id` yang dipilih: banner, judul, rating + bintang, tanggal rilis, genre, dan deskripsi lengkap.
 - Tombol back untuk kembali ke Home.
 
 ---
@@ -42,7 +67,7 @@ Repository: https://github.com/intanayy11/Game-Explore
 | Kotlin: data class, null safety, lambda | `Game`, `GameResponse`, `Genre` (data class); seluruh field API nullable; lambda pada `clickable`, `joinToString`, `items` |
 | Jetpack Compose + Material 3 | Seluruh UI berbasis composable, `MaterialTheme` dengan color scheme custom |
 | Theme & typography | `ui/theme/Color.kt`, `Type.kt`, `Theme.kt` (dark & light mode) |
-| Lazy layout | `LazyVerticalGrid` (2 kolom) di `HomeScreen` |
+| Lazy layout | `LazyColumn` di `HomeScreen` |
 | State & recomposition / search | `mutableStateOf` pada `searchQuery` + `HomeUiState`, debounce 300 ms |
 | Networking RAWG | Retrofit 2.11 + Gson, endpoint `/games` dan `/games/{id}` |
 | Field wajib | `name`, `rating`, `released` (ISO 8601), `description_raw` |
@@ -110,7 +135,7 @@ RAWG API ──► Retrofit (data/remote) ──► DTO (data/model)
    ```kotlin
    when (uiState) {
        is HomeUiState.Loading -> CircularProgressIndicator()
-       is HomeUiState.Success -> LazyVerticalGrid(columns = GridCells.Fixed(2)) { items(...) { ... } }
+       is HomeUiState.Success -> LazyColumn { items(games) { ... } }
        is HomeUiState.Error   -> Text(...) + Button("Coba Lagi")
    }
    ```
@@ -124,8 +149,7 @@ RAWG API ──► Retrofit (data/remote) ──► DTO (data/model)
 Endpoint list `/games` tidak menyertakan field deskripsi — hanya endpoint detail
 `/games/{id}` yang mengembalikannya. Karena itu `HomeScreen` cukup memanggil `getGames()`,
 sedangkan deskripsi diambil ketika user membuka `GameDetailScreen` (`LaunchedEffect(gameId)`).
-Deskripsi ditampilkan dari `description_raw` (plain text), dan bila hanya `description`
-(HTML) yang tersedia tag-nya dibersihkan dengan `Html.fromHtml(...)` sebelum dirender.
+Deskripsi ditampilkan dari `description_raw` (plain text) sehingga tidak perlu parsing HTML.
 
 ---
 
@@ -181,11 +205,3 @@ Build dari terminal:
 | API | RAWG Video Games Database — https://api.rawg.io/docs/ |
 
 Data game disediakan oleh [RAWG](https://rawg.io).
-
----
-
-## Penjelasan Kode (bahan video)
-
-Urutan penjelasan kode selengkapnya — dari `Constants.kt` sampai theme, termasuk
-pemetaan ke setiap butir persyaratan responsi — ada di
-[`docs/Penjelasan-Kode-GameExplore.pdf`](docs/Penjelasan-Kode-GameExplore.pdf).

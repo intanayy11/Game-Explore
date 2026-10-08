@@ -25,12 +25,12 @@ Repository: https://github.com/intanayy11/Game-Explore
 ## Fitur
 
 **Home Screen**
-- Daftar game dari RAWG API memakai `LazyColumn`, tiap kartu menampilkan gambar, judul, rating, dan tanggal rilis (ISO 8601, `YYYY-MM-DD` sesuai spek).
+- Daftar game dari RAWG API memakai `LazyVerticalGrid` (2 kolom), tiap kartu menampilkan gambar, judul, rating, dan tanggal rilis (ISO 8601, `YYYY-MM-DD` sesuai spek).
 - Search bar: mengetik langsung mengubah state, request ke API ditunda 300 ms (debounce).
 - Tiga kondisi UI: loading (spinner), kosong ("Game tidak ditemukan"), error (pesan + tombol Coba Lagi).
 
 **Game Detail Screen**
-- Mengambil detail game berdasarkan `id` yang dipilih: banner, judul, rating + bintang, tanggal rilis, genre, dan deskripsi lengkap.
+- Mengambil detail game berdasarkan `id` yang dipilih: banner, judul, rating + bintang, tanggal rilis, chip genre, dan deskripsi lengkap (HTML dibersihkan).
 - Tombol back untuk kembali ke Home.
 
 ---
@@ -42,7 +42,7 @@ Repository: https://github.com/intanayy11/Game-Explore
 | Kotlin: data class, null safety, lambda | `Game`, `GameResponse`, `Genre` (data class); seluruh field API nullable; lambda pada `clickable`, `joinToString`, `items` |
 | Jetpack Compose + Material 3 | Seluruh UI berbasis composable, `MaterialTheme` dengan color scheme custom |
 | Theme & typography | `ui/theme/Color.kt`, `Type.kt`, `Theme.kt` (dark & light mode) |
-| Lazy layout | `LazyColumn` di `HomeScreen` |
+| Lazy layout | `LazyVerticalGrid` (2 kolom) di `HomeScreen` |
 | State & recomposition / search | `mutableStateOf` pada `searchQuery` + `HomeUiState`, debounce 300 ms |
 | Networking RAWG | Retrofit 2.11 + Gson, endpoint `/games` dan `/games/{id}` |
 | Field wajib | `name`, `rating`, `released` (ISO 8601), `description_raw` |
@@ -110,7 +110,7 @@ RAWG API ──► Retrofit (data/remote) ──► DTO (data/model)
    ```kotlin
    when (uiState) {
        is HomeUiState.Loading -> CircularProgressIndicator()
-       is HomeUiState.Success -> LazyColumn { items(games) { ... } }
+       is HomeUiState.Success -> LazyVerticalGrid(columns = GridCells.Fixed(2)) { items(...) { ... } }
        is HomeUiState.Error   -> Text(...) + Button("Coba Lagi")
    }
    ```
@@ -124,7 +124,8 @@ RAWG API ──► Retrofit (data/remote) ──► DTO (data/model)
 Endpoint list `/games` tidak menyertakan field deskripsi — hanya endpoint detail
 `/games/{id}` yang mengembalikannya. Karena itu `HomeScreen` cukup memanggil `getGames()`,
 sedangkan deskripsi diambil ketika user membuka `GameDetailScreen` (`LaunchedEffect(gameId)`).
-Deskripsi ditampilkan dari `description_raw` (plain text) sehingga tidak perlu parsing HTML.
+Deskripsi ditampilkan dari `description_raw` (plain text), dan bila hanya `description`
+(HTML) yang tersedia tag-nya dibersihkan dengan `Html.fromHtml(...)` sebelum dirender.
 
 ---
 
@@ -180,3 +181,11 @@ Build dari terminal:
 | API | RAWG Video Games Database — https://api.rawg.io/docs/ |
 
 Data game disediakan oleh [RAWG](https://rawg.io).
+
+---
+
+## Penjelasan Kode (bahan video)
+
+Urutan penjelasan kode selengkapnya — dari `Constants.kt` sampai theme, termasuk
+pemetaan ke setiap butir persyaratan responsi — ada di
+[`docs/penjelasan-kode.md`](docs/penjelasan-kode.md).

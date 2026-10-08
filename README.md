@@ -15,12 +15,20 @@ Repository: https://github.com/intanayy11/Game-Explore
       <img src="screenshots/home.png" width="100%">
     </td>
     <td align="center" width="33%">
-      <b>Search State</b><br>
+      <b>Search Screen</b><br>
       <img src="screenshots/search.png" width="100%">
     </td>
     <td align="center" width="33%">
       <b>Game Detail Screen</b><br>
       <img src="screenshots/detail.png" width="100%">
+    </td>
+    <td align="center" width="33%">
+      <b>Empty State</b><br>
+      <img src="screenshots/empty-state.png" width="100%">
+    </td>
+    <td align="center" width="33%">
+      <b>Error State</b><br>
+      <img src="screenshots/error-state.png" width="100%">
     </td>
   </tr>
 </table>

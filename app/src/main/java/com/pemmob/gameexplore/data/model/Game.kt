@@ -4,7 +4,11 @@ import com.google.gson.annotations.SerializedName
 
 data class GameResponse(
     @SerializedName("results")
-    val results: List<Game>?
+    val results: List<Game>?,
+    @SerializedName("count")
+    val count: Int?,
+    @SerializedName("next")
+    val next: String?
 )
 
 data class Game(

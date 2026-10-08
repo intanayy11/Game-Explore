@@ -17,7 +17,11 @@ import kotlinx.coroutines.launch
  */
 sealed interface HomeUiState {
     object Loading : HomeUiState
-    data class Success(val games: List<Game>) : HomeUiState
+    data class Success(
+        val games: List<Game>,
+        val hasMore: Boolean = false,
+        val isLoadingMore: Boolean = false
+    ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
 
@@ -40,7 +44,13 @@ class GameViewModel : ViewModel() {
         private set
 
     /** Job debounce search; dibatalkan tiap kali user mengetik karakter baru. */
-    private var searchJob: Job? = null
+        private var searchJob: Job? = null
+
+        /** Halaman berikutnya untuk infinite scroll; di-reset tiap kali search/query baru. */
+        private var currentPage = 1
+
+        /** Mencegah request pagination ganda ketika user scroll cepat. */
+        private var isLoadingMore = false
 
     /**
      * Penanda request terakhir. Karena tiap request berjalan di coroutine terpisah,
@@ -69,25 +79,59 @@ class GameViewModel : ViewModel() {
     }
 
     /** Memuat daftar game; dipanggil dari init, hasil debounce search, dan tombol "Coba Lagi". */
-    fun fetchGames(query: String? = null) {
-        val requestId = ++homeRequestId
-        val keyword = query?.trim().orEmpty().ifEmpty { null }
-        viewModelScope.launch {
-            homeUiState = HomeUiState.Loading
-            try {
-                val games = repository.getGames(search = keyword)
-                if (requestId == homeRequestId) {
-                    homeUiState = HomeUiState.Success(games)
-                }
-            } catch (e: Exception) {
-                if (requestId == homeRequestId) {
-                    homeUiState = HomeUiState.Error(
-                        e.localizedMessage ?: "Terjadi kesalahan saat memuat data"
-                    )
+        fun fetchGames(query: String? = null) {
+            val requestId = ++homeRequestId
+            currentPage = 1
+            isLoadingMore = false
+            val keyword = query?.trim().orEmpty().ifEmpty { null }
+            viewModelScope.launch {
+                homeUiState = HomeUiState.Loading
+                try {
+                    val response = repository.getGames(search = keyword, page = 1)
+                    if (requestId == homeRequestId) {
+                        homeUiState = HomeUiState.Success(
+                            games = response.results ?: emptyList(),
+                            hasMore = response.next != null
+                        )
+                    }
+                } catch (e: Exception) {
+                    if (requestId == homeRequestId) {
+                        homeUiState = HomeUiState.Error(
+                            e.localizedMessage ?: "Terjadi kesalahan saat memuat data"
+                        )
+                    }
                 }
             }
         }
-    }
+
+        /** Infinite scroll: memuat halaman berikutnya saat grid sudah sampai bawah. */
+            fun loadMoreGames() {
+                val state = homeUiState
+            if (state !is HomeUiState.Success || !state.hasMore || isLoadingMore) return
+            isLoadingMore = true
+            val requestId = homeRequestId
+            val page = currentPage + 1
+            val keyword = searchQuery.trim().ifEmpty { null }
+            viewModelScope.launch {
+                try {
+                    val response = repository.getGames(search = keyword, page = page)
+                    if (requestId == homeRequestId && state === homeUiState) {
+                        currentPage = page
+                        homeUiState = state.copy(
+                            games = state.games + (response.results ?: emptyList()),
+                            hasMore = response.next != null,
+                            isLoadingMore = false
+                        )
+                    }
+                } catch (e: Exception) {
+                    if (requestId == homeRequestId) {
+                        homeUiState = state.copy(isLoadingMore = false)
+                    }
+                } finally {
+                    isLoadingMore = false
+                }
+            }
+        }
 
     /**
      * Dipanggil tepat sebelum navigasi ke layar detail: mengosongkan state detail lama
@@ -117,6 +161,7 @@ class GameViewModel : ViewModel() {
     }
 
     companion object {
-        private const val SEARCH_DEBOUNCE_MS = 300L
-    }
+            private const val SEARCH_DEBOUNCE_MS = 300L
+            private const val PAGE_SIZE = 20
+        }
 }

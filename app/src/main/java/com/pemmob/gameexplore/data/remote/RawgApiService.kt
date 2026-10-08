@@ -8,10 +8,11 @@ import retrofit2.http.Query
 
 interface RawgApiService {
     @GET("games")
-    suspend fun getGames(
-        @Query("key") apiKey: String,
-        @Query("search") search: String? = null
-    ): GameResponse
+        suspend fun getGames(
+            @Query("key") apiKey: String,
+            @Query("search") search: String? = null,
+            @Query("page") page: Int? = null
+        ): GameResponse
 
     @GET("games/{id}")
     suspend fun getGameDetail(

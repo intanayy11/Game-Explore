@@ -9,7 +9,7 @@ Repository: https://github.com/intanayy11/Game-Explore
 ---
 
 ## Screenshots
-
+---
 <table border="1">
   <tr>
     <td align="center" width="30%">
